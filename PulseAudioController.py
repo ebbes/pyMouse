@@ -103,7 +103,7 @@ if __name__ == '__main__':
         led = None
         if response_led_file != "":
             try:
-                led = Led(os.open(response_led_file, os.O_RDWR))
+                led = Led(os.open(response_led_file, os.O_WRONLY))
             except:
                 raise OSError("Response led file could not be opened")
             led.set_value(False)
