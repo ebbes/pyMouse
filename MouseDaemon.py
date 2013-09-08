@@ -82,7 +82,7 @@ class MouseDaemon:
                 elif data.wheel < 0:
                     event_responder.respond(6)
                 
-                print(data)
+                #print(data)
                 
                 #current implementation: don't register move when overflow bit set
                 if not data.xovfl:
