@@ -11,12 +11,14 @@ switch_user = True
 max_vol = 100
 min_vol = 35
 sink = 0
+sink_no = 1
 user_name = "pulse"
 group_name = "pulse"
 
 class PulseAudioMouseEventResponder(MouseEventResponder):
-    def __init__(self, sink, max_vol, min_vol, led):
+    def __init__(self, sink, sink_no, max_vol, min_vol, led):
         self.sink = sink
+        self.sink_no = sink_no
         self.max_vol = max_vol
         self.min_vol = min_vol
         self.led = led
@@ -38,10 +40,10 @@ class PulseAudioMouseEventResponder(MouseEventResponder):
     
     def pulseaudio_write_volume(self, vol):
         #do not call this directly!
-        subprocess.call(["pactl", "--", "set-sink-volume", str(self.sink), str(vol) + "%"], stderr=subprocess.DEVNULL)
+        subprocess.call(["pactl", "--", "set-sink-volume", str(self.sink_no), str(vol) + "%"], stderr=subprocess.DEVNULL)
     
     def pulseaudio_toggle_mute(self):
-        subprocess.call(["pactl", "set-sink-mute", str(self.sink), "toggle"], stderr=subprocess.DEVNULL)
+        subprocess.call(["pactl", "set-sink-mute", str(self.sink_no), "toggle"], stderr=subprocess.DEVNULL)
         self.led.set_value(self.pulseaudio_get_muted())
    
     def pulseaudio_get_volume(self):
@@ -103,7 +105,7 @@ if __name__ == '__main__':
         led = None
         if response_led_file != "":
             try:
-                led = Led(os.open(response_led_file, os.O_WRONLY))
+                led = Led(os.open(response_led_file, os.O_RDWR))
             except:
                 raise OSError("Response led file could not be opened")
             led.set_value(False)
@@ -113,7 +115,7 @@ if __name__ == '__main__':
         
         daemon = MouseDaemon(mouse_file=mouse_file, switch_user=switch_user, user=user_name, group=group_name)
         
-        responder = PulseAudioMouseEventResponder(sink, max_vol, min_vol, led)
+        responder = PulseAudioMouseEventResponder(sink, sink_no, max_vol, min_vol, led)
         daemon.handleEvents(responder)
     except Exception as e:
         print(e, file=sys.stderr)
